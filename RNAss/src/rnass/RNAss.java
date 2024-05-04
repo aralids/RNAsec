@@ -17,7 +17,7 @@ public class RNAss {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        String seq = "aacccuuguaguaaccau"; // "ugagcgaauucagc" "agcacacaggc" "gggaccuucc" "aauuuuucccccgg"
+        String seq = "aacccuuguaguaaccau"; // "ugagcgaauucagc" "agcacacaggc" "gggaccuucc" "aauuuuucccccgg" "aacccuuguaguaaccau"
         Dictionary<String, Integer> scoringScheme = new Hashtable<>();
         scoringScheme.put("gc", 1);
         scoringScheme.put("cg", 1);
@@ -116,8 +116,8 @@ public class RNAss {
     }
     
     static private int couple(int i, int j, Dictionary<String, Integer> scoringScheme, String seq) {
-        if (scoringScheme.get(seq.charAt(i) + "" + seq.charAt(i+j)) != null) {
-            return scoringScheme.get(seq.charAt(i) + "" + seq.charAt(i+j));
+        if (scoringScheme.get(seq.charAt(i) + "" + seq.charAt(j)) != null) {
+            return scoringScheme.get(seq.charAt(i) + "" + seq.charAt(j));
         }
         else
             return 0;
@@ -144,12 +144,22 @@ public class RNAss {
                 int bottom = entryValue(matrix.get(i+1)[j-1]);
                 int bottomLeft = entryValue(matrix.get(i+1)[j-2]) + couple(i, j, scoringScheme, seq);
                 int bifurcation = 0;
-                for (int k = i; k < j - 3; k++) {
-                    bifurcation = Math.max(bifurcation, entryValue(matrix.get(i)[k]) + entryValue(matrix.get(k+1)[j-k+i-1]));
+                
+                for (int k = 0; k <= j - 3; k++) {
+                    int val1, val2;
+                    if (k <= 0) val1 = 0;
+                    else val1 = entryValue(matrix.get(i)[k-1]);
+                    if (k >= seq.length()) val2 = 0;
+                    else val2 = entryValue(matrix.get(i+k+1)[j-k-2]);
+                    
+                    if (couple((k+i), (j+i), scoringScheme, seq) == 1) {
+                        bifurcation = Math.max(bifurcation, val1 + val2 + couple((k+i), (j+i), scoringScheme, seq));
+                    }
+                    //System.out.println("--" + i + " " + (k-1) + ", " + (i+k+1) + " " + (j-k-2) + " | " + (k+i) + " " + (j+i) + " | " + val1 + " + " + val2 + " + " + couple((k+i), (j+i), scoringScheme, seq));
                 }
-                int max = Math.max(Math.max(Math.max(left, bottom), bottomLeft), bifurcation);
+                int max = Math.max(left, bifurcation);
                 matrix.get(i)[j].setValue(max);
-                System.out.println(i + ", " + j + "--------------" + max);
+                System.out.println(i + ", " + j + " " + max + "\n");
             }
             System.out.println("============");
         }
