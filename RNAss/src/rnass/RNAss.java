@@ -17,14 +17,14 @@ public class RNAss {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        String seq = "aauuuuucccccgg"; // "ugagcgaauucagc" "agcacacaggc" "gggaccuucc"
+        String seq = "aacccuuguaguaaccau"; // "ugagcgaauucagc" "agcacacaggc" "gggaccuucc" "aauuuuucccccgg"
         Dictionary<String, Integer> scoringScheme = new Hashtable<>();
         scoringScheme.put("gc", 1);
         scoringScheme.put("cg", 1);
         scoringScheme.put("au", 1);
         scoringScheme.put("ua", 1);
-        scoringScheme.put("ug", 0);
-        scoringScheme.put("gu", 0);
+        scoringScheme.put("ug", 1);
+        scoringScheme.put("gu", 1);
         ArrayList<int[]> matrix = new ArrayList<int[]>();
         
         calculateMatrix(seq, scoringScheme);
@@ -116,41 +116,40 @@ public class RNAss {
     }
     
     static private int couple(int i, int j, Dictionary<String, Integer> scoringScheme, String seq) {
-        if (scoringScheme.get(seq.charAt(i) + "" + seq.charAt(j)) != null) {
-            return scoringScheme.get(seq.charAt(i) + "" + seq.charAt(j));
+        if (scoringScheme.get(seq.charAt(i) + "" + seq.charAt(i+j)) != null) {
+            return scoringScheme.get(seq.charAt(i) + "" + seq.charAt(i+j));
         }
         else
             return 0;
     }
     
+    static private int entryValue(MatrixEntry entry) {
+        if (entry == null) return 0;
+        else return entry.getValue();
+    }
+            
     static private ArrayList<MatrixEntry[]> calculateMatrix(String seq, Dictionary<String, Integer> scoringScheme) {
         ArrayList<MatrixEntry[]> matrix = new ArrayList<>();
         for (int i = 0; i < seq.length(); i++) {
-            MatrixEntry[] entry = new MatrixEntry[seq.length()];
-            for (int j = 0; j < seq.length(); j++) {
+            MatrixEntry[] entry = new MatrixEntry[seq.length() - i];
+            for (int j = 0; j < seq.length() - i; j++) {
                 entry[j] = new MatrixEntry();
             }
             matrix.add(entry);
         }
         
-        for (int k = 4; k <= seq.length(); k++) {
-            for (int i = 0; i < seq.length() - k; i++) {
-                int j = i + k;
-                if (j - i > 3) {
-                    int bottom = matrix.get(i+1)[j].getValue();
-                    int left = matrix.get(i)[j-1].getValue();
-                    int bottomLeft = matrix.get(i+1)[j-1].getValue() + couple(i, j, scoringScheme, seq);
-                    int bifValue = -Integer.MIN_VALUE;
-                    for (int t = i; t < j; t++) {     
-                        //System.out.println(i + " " + t + " | " + (t+1) + " " + (j));
-                        if (matrix.get(i)[t].getValue() + matrix.get(t+1)[j].getValue() > bifValue) {
-                            bifValue = matrix.get(i)[t].getValue() + matrix.get(t+1)[j].getValue();
-                        }
-                    }
-                    int max = Math.max(Math.max(Math.max(left, bottom), bottomLeft), bifValue);
-                    matrix.get(i)[j].setValue(max);
-                    System.out.println(i + ", " + j + " | " + max);
+        for (int j = 4; j <= seq.length(); j++) {
+            for (int i = 0; i < seq.length() - j; i++) {
+                int left = entryValue(matrix.get(i)[j-1]);
+                int bottom = entryValue(matrix.get(i+1)[j-1]);
+                int bottomLeft = entryValue(matrix.get(i+1)[j-2]) + couple(i, j, scoringScheme, seq);
+                int bifurcation = 0;
+                for (int k = i; k < j - 3; k++) {
+                    bifurcation = Math.max(bifurcation, entryValue(matrix.get(i)[k]) + entryValue(matrix.get(k+1)[j-k+i-1]));
                 }
+                int max = Math.max(Math.max(Math.max(left, bottom), bottomLeft), bifurcation);
+                matrix.get(i)[j].setValue(max);
+                System.out.println(i + ", " + j + "--------------" + max);
             }
             System.out.println("============");
         }
