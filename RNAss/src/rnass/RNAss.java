@@ -27,28 +27,9 @@ public class RNAss {
         scoringScheme.put("gu", 0);
         ArrayList<int[]> matrix = new ArrayList<int[]>();
         
-        for (int i = 0; i < seq.length(); i++) {
-            matrix.add( new int[seq.length() - i] );
-        }
-        for (int i = 0; i < seq.length(); i++) {
-            for (int j = 0; j < matrix.size(); j++) {
-                if (matrix.get(j).length > i) {
-                    if (i <= 3) {
-                        matrix.get(j)[i] = 0;
-                    }
-                    else {
-                        int bottom = matrix.get(j+1)[i-1];
-                        int left = matrix.get(j)[i-1];
-                        int bottomLeft = scoringScheme.get(seq.charAt(j) + "" + seq.charAt(i+j)) == null ? matrix.get(j+1)[i-2] : matrix.get(j+1)[i-2] + scoringScheme.get(seq.charAt(j) + "" + seq.charAt(i+j));
-                        
-                        matrix.get(j)[i] = Math.max(Math.max(bottom, left), bottomLeft);
-                    }
-                    System.out.println(j + " " + i + " " + matrix.get(j)[i]);
-                }
-            }
-            System.out.println("=================");
-        }
+        calculateMatrix(seq, scoringScheme);
         
+        /*
         String[] dotBracket = new String[seq.length()];
         int max = matrix.get(0)[seq.length() - 1];
         int start = 0;
@@ -58,7 +39,7 @@ public class RNAss {
         Nt head = null;
         Nt tail = null;
         while (max != 0) {
-            System.out.println(max + " " + start + " " + end + " " + seq.charAt(start) + "" + seq.charAt(start+end));
+            //System.out.println(max + " " + start + " " + end + " " + seq.charAt(start) + "" + seq.charAt(start+end));
             if (scoringScheme.get(seq.charAt(start) + "" + seq.charAt(start + end)) != null && matrix.get(start + 1)[end - 2] == max - scoringScheme.get(seq.charAt(start) + "" + seq.charAt(start + end))) {
                 dotBracket[start] = "(";
                 dotBracket[start + end] = ")";
@@ -119,18 +100,78 @@ public class RNAss {
         
         String dotBracketString = String.join("", dotBracket);
         Nt el = head;
-        /*
+        
         System.out.println(el);
         while (el.getNext() != null) {
             el = el.getNext();
             System.out.println(el);
         }
-        */
-        System.out.println(seq);
-        System.out.println(dotBracketString);
+        
+        //System.out.println(seq);
+        //System.out.println(dotBracketString);
         calculateLoops(head, tail);
         
-        System.out.println(allLoops.get(0).getNeighbors());
+        //System.out.println(allLoops.get(0).getNeighbors());
+        */
+    }
+    
+    static private ArrayList<MatrixEntry[]> calculateMatrix(String seq, Dictionary<String, Integer> scoringScheme) {
+        ArrayList<MatrixEntry[]> matrix = new ArrayList<>();
+        for (int i = 0; i < seq.length(); i++) {
+            MatrixEntry[] entry = new MatrixEntry[seq.length() - i + 1];
+            for (int j = 0; j < seq.length() - i + 1; j++) {
+                entry[j] = new MatrixEntry();
+            }
+            matrix.add(entry);
+        }
+        
+        for (int j = 5; j <= seq.length(); j++) {
+            for (int i = 0; i < seq.length(); i++) {
+                if (j <= seq.length() - i) {
+                    //System.out.println("i, j: " + i + ", " + j);
+                    int bottom = matrix.get(i+1)[j-1].getValue();
+                    int left = matrix.get(i)[j-1].getValue();
+                    int bottomLeft = scoringScheme.get(seq.charAt(i) + "" + seq.charAt(i+j-1)) == null ? matrix.get(i+1)[j-2].getValue() : matrix.get(i+1)[j-2].getValue() + scoringScheme.get(seq.charAt(i) + "" + seq.charAt(i+j-1));
+                    int bifValue = -Integer.MIN_VALUE;
+                    int[] bifArg = new int[3];
+
+
+                    for (int k = i + 1; k < i + j; k++) {
+                        System.out.println(": " + i + " " + (k-1-i) + " | " + k + " " + (j - k + i - 1) + ", " + matrix.get(i)[k-1 - i].getValue() + " + " + matrix.get(k)[j - k + i - 1].getValue());
+                        if (scoringScheme.get(seq.charAt(k-1) + "" + seq.charAt(j)) != null && matrix.get(i)[k-1 - i].getValue() + matrix.get(k)[j - k + i - 1].getValue() > bifValue) {
+                            bifValue = matrix.get(i)[k-1 - i].getValue() + matrix.get(k)[j - k + i - 1].getValue();
+                            bifArg[0] = i;
+                            bifArg[1] = j;
+                            bifArg[2] = k;
+                        } 
+                    }
+
+                    matrix.get(i)[j].setValue(Math.max(Math.max(Math.max(bottom, left), bottomLeft), bifValue));
+
+                    if (matrix.get(i)[j].getValue() == left) {
+                        matrix.get(i)[j].setLeft(true);
+                        System.out.println("LEFT");
+                    }
+                    if (matrix.get(i)[j].getValue() == bottom) {
+                        matrix.get(i)[j].setBottom(true);
+                        System.out.println("BOTTOM");
+                    }
+                    if (matrix.get(i)[j].getValue() == bottomLeft) {
+                        matrix.get(i)[j].setBottomLeft(true);
+                        System.out.println("BOTTOM-LEFT");
+                    }
+                    if (matrix.get(i)[j].getValue() == bifValue) {
+                        matrix.get(i)[j].setBifurcation(true);
+                        matrix.get(i)[j].setBifurcationArg(bifArg);
+                        System.out.println("BIFURCATION");
+                    }
+                    System.out.println(i + " " + j + " " + matrix.get(i)[j] + " " + seq.charAt(i) + "" + seq.charAt(i+j-1));
+                }
+            }
+            System.out.println("=================");
+        }
+        
+        return matrix;
     }
     
     static private Loop calculateLoops(Nt head, Nt tail) {
