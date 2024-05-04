@@ -115,60 +115,44 @@ public class RNAss {
         */
     }
     
+    static private int couple(int i, int j, Dictionary<String, Integer> scoringScheme, String seq) {
+        if (scoringScheme.get(seq.charAt(i) + "" + seq.charAt(j)) != null) {
+            return scoringScheme.get(seq.charAt(i) + "" + seq.charAt(j));
+        }
+        else
+            return 0;
+    }
+    
     static private ArrayList<MatrixEntry[]> calculateMatrix(String seq, Dictionary<String, Integer> scoringScheme) {
         ArrayList<MatrixEntry[]> matrix = new ArrayList<>();
         for (int i = 0; i < seq.length(); i++) {
-            MatrixEntry[] entry = new MatrixEntry[seq.length() - i + 1];
-            for (int j = 0; j < seq.length() - i + 1; j++) {
+            MatrixEntry[] entry = new MatrixEntry[seq.length()];
+            for (int j = 0; j < seq.length(); j++) {
                 entry[j] = new MatrixEntry();
             }
             matrix.add(entry);
         }
         
-        for (int j = 5; j <= seq.length(); j++) {
-            for (int i = 0; i < seq.length(); i++) {
-                if (j <= seq.length() - i) {
-                    //System.out.println("i, j: " + i + ", " + j);
-                    int bottom = matrix.get(i+1)[j-1].getValue();
+        for (int k = 4; k <= seq.length(); k++) {
+            for (int i = 0; i < seq.length() - k; i++) {
+                int j = i + k;
+                if (j - i > 3) {
+                    int bottom = matrix.get(i+1)[j].getValue();
                     int left = matrix.get(i)[j-1].getValue();
-                    int bottomLeft = scoringScheme.get(seq.charAt(i) + "" + seq.charAt(i+j-1)) == null ? matrix.get(i+1)[j-2].getValue() : matrix.get(i+1)[j-2].getValue() + scoringScheme.get(seq.charAt(i) + "" + seq.charAt(i+j-1));
+                    int bottomLeft = matrix.get(i+1)[j-1].getValue() + couple(i, j, scoringScheme, seq);
                     int bifValue = -Integer.MIN_VALUE;
-                    int[] bifArg = new int[3];
-
-
-                    for (int k = i + 1; k < i + j; k++) {
-                        System.out.println(": " + i + " " + (k-1-i) + " | " + k + " " + (j - k + i - 1) + ", " + matrix.get(i)[k-1 - i].getValue() + " + " + matrix.get(k)[j - k + i - 1].getValue());
-                        if (scoringScheme.get(seq.charAt(k-1) + "" + seq.charAt(j)) != null && matrix.get(i)[k-1 - i].getValue() + matrix.get(k)[j - k + i - 1].getValue() > bifValue) {
-                            bifValue = matrix.get(i)[k-1 - i].getValue() + matrix.get(k)[j - k + i - 1].getValue();
-                            bifArg[0] = i;
-                            bifArg[1] = j;
-                            bifArg[2] = k;
-                        } 
+                    for (int t = i; t < j; t++) {     
+                        //System.out.println(i + " " + t + " | " + (t+1) + " " + (j));
+                        if (matrix.get(i)[t].getValue() + matrix.get(t+1)[j].getValue() > bifValue) {
+                            bifValue = matrix.get(i)[t].getValue() + matrix.get(t+1)[j].getValue();
+                        }
                     }
-
-                    matrix.get(i)[j].setValue(Math.max(Math.max(Math.max(bottom, left), bottomLeft), bifValue));
-
-                    if (matrix.get(i)[j].getValue() == left) {
-                        matrix.get(i)[j].setLeft(true);
-                        System.out.println("LEFT");
-                    }
-                    if (matrix.get(i)[j].getValue() == bottom) {
-                        matrix.get(i)[j].setBottom(true);
-                        System.out.println("BOTTOM");
-                    }
-                    if (matrix.get(i)[j].getValue() == bottomLeft) {
-                        matrix.get(i)[j].setBottomLeft(true);
-                        System.out.println("BOTTOM-LEFT");
-                    }
-                    if (matrix.get(i)[j].getValue() == bifValue) {
-                        matrix.get(i)[j].setBifurcation(true);
-                        matrix.get(i)[j].setBifurcationArg(bifArg);
-                        System.out.println("BIFURCATION");
-                    }
-                    System.out.println(i + " " + j + " " + matrix.get(i)[j] + " " + seq.charAt(i) + "" + seq.charAt(i+j-1));
+                    int max = Math.max(Math.max(Math.max(left, bottom), bottomLeft), bifValue);
+                    matrix.get(i)[j].setValue(max);
+                    System.out.println(i + ", " + j + " | " + max);
                 }
             }
-            System.out.println("=================");
+            System.out.println("============");
         }
         
         return matrix;
