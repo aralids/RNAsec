@@ -73,6 +73,12 @@ class Nt {
     Object getLoop() {
         return this.loop.getNts();
     }
-    
-    
+
+    public void setSeqIndex(int seqIndex) {
+        this.seqIndex = seqIndex;
+    }
+
+    public void setDotBracketChar(String dotBracketChar) {
+        this.dotBracketChar = dotBracketChar;
+    }
 }

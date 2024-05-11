@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package rnass;
+import java.util.ArrayList;
 
 /**
  *
@@ -10,11 +11,8 @@ package rnass;
  */
 class MatrixEntry {
     private int value;
-    private boolean left = false;
-    private boolean bottom = false;
-    private boolean bottomLeft = false;
-    private boolean bifurcation = false;
-    private int[] bifurcationArg;
+    private ArrayList<MatrixEntry[]> backtraceTo = new ArrayList<>();
+    private ArrayList<int[]> changeIndices = new ArrayList<>();
 
     public MatrixEntry() {
         this.value = 0;
@@ -27,25 +25,23 @@ class MatrixEntry {
     public int getValue() {
         return value;
     }
+    
+    public void addBacktrace(MatrixEntry i, MatrixEntry j) {
+        MatrixEntry[] arr = {i, j};
+        this.backtraceTo.add(arr);
+    }
+    
+    public void addIndices(int i, int j) {
+        int[] arr = {i, j};
+        this.changeIndices.add(arr);
+    }
 
-    void setLeft(boolean b) {
-        this.left = b;
+    public int[] getChangeIndices() {
+        return changeIndices.get(0);
     }
-    
-    void setBottom(boolean b) {
-        this.bottom = b;
-    }
-    
-    void setBottomLeft(boolean b) {
-        this.bottomLeft = b;
-    }
-    
-    void setBifurcation(boolean b) {
-        this.bifurcation = b;
-    }
-    
-    void setBifurcationArg(int[] bifArg) {
-        this.bifurcationArg = bifArg;
+
+    public MatrixEntry[] getBacktraceTo() {
+        return backtraceTo.get(0);
     }
 
     @Override
