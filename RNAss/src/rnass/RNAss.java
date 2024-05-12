@@ -17,7 +17,7 @@ public class RNAss {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-         // "ugagcgaauucagc" "agcacacaggc" "gggaccuucc" "aauuuuucccccgg" "aacccuuguaguaaccau"
+         // "ugagcgaauucagc" "agcacacaggc" "gggaccuucc" "aauuuuucccccgg" "aacccuuguaguaaccau" "aauuuuucccccggggcccccuuuuuaa"
         Dictionary<String, Integer> scoringScheme = new Hashtable<>();
         Arrays.fill(seqCopy, -1);
         scoringScheme.put("gc", 1);
@@ -61,6 +61,7 @@ public class RNAss {
             }
         }
         Nt head = temp[0];
+        Nt tail = temp[seq.length()-1];
         System.out.println(String.join("", dotBracket));
         
         /*
@@ -72,8 +73,12 @@ public class RNAss {
         }
         */
         
-        calculateLoops(head, null);
-        System.out.println(allLoops.get(0).getNeighbors());
+        calculateLoops(head, tail);
+        //System.out.println(allLoops.get(0).toString());
+        //System.out.println(allLoops.get(1).toString());
+        //System.out.println(allLoops.get(2).toString());
+        //System.out.println(allLoops.get(3).toString());
+        //System.out.println(allLoops.get(4).toString());
         allLoops.get(0).calculateOrigin();
     }
     
@@ -156,16 +161,16 @@ public class RNAss {
     }
     
     static private Loop calculateLoops(Nt head, Nt tail) {
-        Loop currLoop = new Loop();
+        Loop currLoop = new Loop(head.getPrev(), tail.getNext());
         allLoops.add(currLoop);
         Nt currEl = head;
-        while (currEl != null && !currEl.compare(tail)) {
+        while (currEl != null && !currEl.compare(tail.getNext())) {
             currEl.setLoop(currLoop);
             currLoop.increment();
             currLoop.addNt(currEl.getSeqIndex());
-            if (currEl.getDotBracketChar() == "." || currEl.getDotBracketChar() == ")") currEl = currEl.getNext();
-            else if (currEl.getDotBracketChar() == "(") {
-                currLoop.addNb(calculateLoops(currEl.getNext(), currEl.getMatch()));
+            if (".".equals(currEl.getDotBracketChar()) || ")".equals(currEl.getDotBracketChar())) currEl = currEl.getNext();
+            else if ("(".equals(currEl.getDotBracketChar())) {
+                currLoop.addNb(calculateLoops(currEl.getNext(), currEl.getMatch().getPrev()));
                 currEl = currEl.getMatch();
             }
         }

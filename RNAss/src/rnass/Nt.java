@@ -15,6 +15,8 @@ class Nt {
     private Nt prev = null;
     private Nt next = null;
     private Nt match = null;
+    private double cx;
+    private double cy;
     private Loop loop;
     
     public Nt(int seqIndex, String dotBracketChar) {
@@ -80,5 +82,14 @@ class Nt {
 
     public void setDotBracketChar(String dotBracketChar) {
         this.dotBracketChar = dotBracketChar;
+    }
+
+    public void setCx(double cx, double cy) {
+        this.cx = cx;
+        this.cy = cy;
+    }
+
+    public double[] getCxCy() {
+        return new double[] {this.cx, this.cy};
     }
 }
