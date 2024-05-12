@@ -4,6 +4,9 @@
  */
 package rnass;
 import java.util.*;
+import javax.swing.*;
+import java.awt.*; 
+import java.awt.event.*; 
 
 /**
  *
@@ -11,7 +14,7 @@ import java.util.*;
  */
 public class RNAss {
     static private ArrayList<Loop> allLoops = new ArrayList<Loop>();
-    static String seq = "ugagcgaauucagc";
+    static String seq = "gggaccuucc";
     static int[] seqCopy = new int[seq.length()];
     /**
      * @param args the command line arguments
@@ -75,6 +78,23 @@ public class RNAss {
             curr = curr.getNext();  
         }
         System.out.println(Arrays.toString(curr.getCxCy()));
+        
+        JFrame frame = new JFrame();
+        JButton b = new JButton("button1");
+        JPanel p = new JPanel();
+        p.add(b);
+        p.add(new JLabel("Dies ist ein viel zu langer Text für dieses " +
+                "kleine Fenster, so dass man horizontal " +
+                "scrollen muss, um ihn komplett zu lesen."));
+        p.setBackground(Color.white); 
+        JScrollPane scrollPane = new JScrollPane (p, 
+            ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        frame.add(scrollPane);
+        frame.setSize(600, 600);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
         
         //System.out.println(allLoops.get(0).toString());
         //System.out.println(allLoops.get(1).toString());
