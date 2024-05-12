@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class RNAss {
     static private ArrayList<Loop> allLoops = new ArrayList<Loop>();
-    static String seq = "aauuuuucccccgg";
+    static String seq = "ugagcgaauucagc";
     static int[] seqCopy = new int[seq.length()];
     /**
      * @param args the command line arguments
@@ -64,22 +64,24 @@ public class RNAss {
         Nt tail = temp[seq.length()-1];
         System.out.println(String.join("", dotBracket));
         
-        /*
-        Nt curr = head;
-        System.out.println(curr);
-        while (curr.getNext() != null) {
-            curr = curr.getNext();
-            System.out.println(curr);
-        }
-        */
-        
         calculateLoops(head, tail);
+        for (int i = 0; i < allLoops.size(); i++) {
+            allLoops.get(i).calculateOrigin();
+        }
+        System.out.println("=============");
+        Nt curr = head;
+        while (curr.getNext() != null) {
+            System.out.println(Arrays.toString(curr.getCxCy()));
+            curr = curr.getNext();  
+        }
+        System.out.println(Arrays.toString(curr.getCxCy()));
+        
         //System.out.println(allLoops.get(0).toString());
         //System.out.println(allLoops.get(1).toString());
         //System.out.println(allLoops.get(2).toString());
         //System.out.println(allLoops.get(3).toString());
         //System.out.println(allLoops.get(4).toString());
-        allLoops.get(0).calculateOrigin();
+        //System.out.println(Arrays.toString(head.getCxCy()));
     }
     
     static private int couple(int i, int j, Dictionary<String, Integer> scoringScheme, String seq) {
@@ -167,7 +169,7 @@ public class RNAss {
         while (currEl != null && !currEl.compare(tail.getNext())) {
             currEl.setLoop(currLoop);
             currLoop.increment();
-            currLoop.addNt(currEl.getSeqIndex());
+            currLoop.addNt(currEl);
             if (".".equals(currEl.getDotBracketChar()) || ")".equals(currEl.getDotBracketChar())) currEl = currEl.getNext();
             else if ("(".equals(currEl.getDotBracketChar())) {
                 currLoop.addNb(calculateLoops(currEl.getNext(), currEl.getMatch().getPrev()));

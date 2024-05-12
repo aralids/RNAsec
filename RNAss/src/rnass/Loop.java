@@ -17,10 +17,11 @@ class Loop {
     }
     
     private int size = 2;
-    private ArrayList<Integer> ntList = new ArrayList<Integer>();
+    private ArrayList<Integer> ntList = new ArrayList<>();
+    private ArrayList<Nt> nts = new ArrayList<>();
     private Nt[] enclosingPair;
-    private String dir = "-";
-    private ArrayList<Loop> neighbors = new ArrayList<Loop>();
+    private double parentCy;
+    private ArrayList<Loop> neighbors = new ArrayList<>();
     
     public void increment() {
         this.size++;
@@ -33,8 +34,9 @@ class Loop {
         return size;
     }
     
-    public void addNt(int seqIndex) {
-        this.ntList.add(seqIndex);
+    public void addNt(Nt nt) {
+        this.ntList.add(nt.getSeqIndex());
+        this.nts.add(nt);
     }
     
     public void addNb(Loop nb) {
@@ -44,17 +46,34 @@ class Loop {
     public String getNeighbors() {
         return this.neighbors.toString();
     }
+
+    public void setParentCy(double parentCy) {
+        this.parentCy = parentCy;
+    }
     
     public void calculateOrigin() {
+        String dir;
+        if (enclosingPair[0] == null) {
+            dir = "+";
+        }
+        else if ((enclosingPair[0].getCxCy()[1] + enclosingPair[1].getCxCy()[1]) / 2 >= this.parentCy) {
+            dir = "+";
+        }
+        else {
+            dir = "-";
+        }
+        
+        System.out.println(ntList.toString() + " " + dir + " " + this.size);
         double[] p1, p2;
         if (enclosingPair[0] != null) {
             p1 = this.enclosingPair[0].getCxCy();
             p2 = this.enclosingPair[1].getCxCy();
         }
         else {
-            p1 = new double[] {0.792, 0.61};
-            p2 = new double[] {0, 0};
+            p1 = new double[] {0, 0};
+            p2 = new double[] {0.792, 0.61};
         }
+        System.out.println("encPair coords: " + Arrays.toString(p1) + " " + Arrays.toString(p2));
         
         double innerAngle = 360 / this.size;
         double outerAngle = (180 - innerAngle) / 2;
@@ -64,11 +83,9 @@ class Loop {
         double slope = p2[0] != p1[0] ? (p2[1] - p1[1]) / (p2[0] - p1[0]) : 0;
         double perpSlope = -1 / slope;
         double[] midPoint = {(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2};
-        System.out.println("slope: " + slope + " , dir: " + this.dir);
-        System.out.println("midPoint: " + midPoint[0] + " " + midPoint[1]);
         
         double centerX, centerY, lastX, lastY;
-        if ((slope > 0 && "-".equals(this.dir)) || (slope <= 0 && "+".equals(this.dir))) {
+        if ((slope > 0 && "-".equals(dir)) || (slope <= 0 && "+".equals(dir))) {
             centerX = p2[0] == p1[0] ? midPoint[0] + median : midPoint[0] + (median * Math.sqrt(1 / (1 + Math.pow(perpSlope, 2))));
             centerY = p2[1] == p1[1] ? midPoint[1] + median : midPoint[1] + (perpSlope * median * Math.sqrt(1 / (1 + Math.pow(perpSlope, 2))));
         }
@@ -77,7 +94,7 @@ class Loop {
             centerY = p2[1] == p1[1] ? midPoint[1] - median : midPoint[1] - (perpSlope * median * Math.sqrt(1 / (1 + Math.pow(perpSlope, 2))));
         }
         boolean reverse;
-        if ("+".equals(this.dir)) {
+        if ("+".equals(dir)) {
             lastX = p1[0] >= p2[0] ? p1[0] : p2[0];
             lastY = p1[0] >= p2[0] ? p1[1] : p2[1];
             reverse = p1[0] < p2[0];
@@ -97,25 +114,22 @@ class Loop {
             if (reverse) {
                 centers[(this.size-2) - (i-2) - 1][0] = lX;
                 centers[(this.size-2) - (i-2) - 1][1] = lY;
-                System.out.println("reverse");  
             }
             else {
                 centers[i-2][0] = lX;
                 centers[i-2][1] = lY;
-                System.out.println("no reverse");  
             }
-            
             lastX = lX;
             lastY = lY;
         }
-        System.out.println(Arrays.toString(p1)); 
         for (int i = 0; i < this.size-2; i++) {
-            System.out.println(Arrays.toString(centers[i])); 
+            this.nts.get(i).setCxCy(centers[i]); 
+            System.out.println(ntList.get(i) + ": " + Arrays.toString(centers[i])); 
         }
-        System.out.println(Arrays.toString(p2)); 
-        
-        System.out.println("center: " + centerX + ", " + centerY);
-        
+        for (int i = 0; i < this.neighbors.size(); i++) {
+            this.neighbors.get(i).setParentCy(centerY);
+        }
+        System.out.println("\n");
     }
 
     @Override

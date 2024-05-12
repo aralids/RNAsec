@@ -84,9 +84,9 @@ class Nt {
         this.dotBracketChar = dotBracketChar;
     }
 
-    public void setCx(double cx, double cy) {
-        this.cx = cx;
-        this.cy = cy;
+    public void setCxCy(double[] cxCy) {
+        this.cx = cxCy[0];
+        this.cy = cxCy[1];
     }
 
     public double[] getCxCy() {
