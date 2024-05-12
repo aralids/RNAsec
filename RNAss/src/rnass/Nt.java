@@ -71,7 +71,7 @@ class Nt {
     }
 
     Object getLoop() {
-        return this.loop.getNts();
+        return this.loop.getSize();
     }
 
     public void setSeqIndex(int seqIndex) {

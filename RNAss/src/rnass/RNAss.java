@@ -73,7 +73,8 @@ public class RNAss {
         */
         
         calculateLoops(head, null);
-        System.out.println(allLoops.get(0));
+        System.out.println(allLoops.get(0).getNeighbors());
+        allLoops.get(0).calculateOrigin();
     }
     
     static private int couple(int i, int j, Dictionary<String, Integer> scoringScheme, String seq) {
@@ -160,7 +161,7 @@ public class RNAss {
         Nt currEl = head;
         while (currEl != null && !currEl.compare(tail)) {
             currEl.setLoop(currLoop);
-            currLoop.incrementNts();
+            currLoop.increment();
             currLoop.addNt(currEl.getSeqIndex());
             if (currEl.getDotBracketChar() == "." || currEl.getDotBracketChar() == ")") currEl = currEl.getNext();
             else if (currEl.getDotBracketChar() == "(") {
