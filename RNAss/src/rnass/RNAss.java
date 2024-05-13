@@ -81,15 +81,16 @@ public class RNAss {
         
         JFrame frame = new JFrame();
         JButton b = new JButton("button1");
-        JPanel p = new JPanel();
-        p.add(b);
-        p.add(new JLabel("Dies ist ein viel zu langer Text für dieses " +
-                "kleine Fenster, so dass man horizontal " +
-                "scrollen muss, um ihn komplett zu lesen."));
+        JPanel p = new JPanel(new BorderLayout());
+        //p.add(b, BorderLayout.NORTH);
+        p.add(new Circle(-100, 0, 200));
+        p.add(new Circle(-25, 0, 650));
+        //p.add(new JLabel("Dies ist ein viel zu langer Text für dieses " +
+        //        "kleine Fenster, so dass man horizontal " +
+        //        "scrollen muss, um ihn komplett zu lesen."), BorderLayout.SOUTH);
         p.setBackground(Color.white); 
-        JScrollPane scrollPane = new JScrollPane (p, 
-            ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        p.setPreferredSize(new Dimension(800, 800));
+        JScrollPane scrollPane = new JScrollPane (p);
         frame.add(scrollPane);
         frame.setSize(600, 600);
         frame.setLocationRelativeTo(null);

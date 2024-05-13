@@ -54,13 +54,13 @@ class Loop {
     public void calculateOrigin() {
         String dir;
         if (enclosingPair[0] == null) {
-            dir = "+";
+            dir = "-";
         }
         else if ((enclosingPair[0].getCxCy()[1] + enclosingPair[1].getCxCy()[1]) / 2 >= this.parentCy) {
-            dir = "+";
+            dir = "-";
         }
         else {
-            dir = "-";
+            dir = "+";
         }
         
         System.out.println(ntList.toString() + " " + dir + " " + this.size);
